@@ -169,7 +169,8 @@ class Poke_a_Greg:
 								print("\n" + self.name + " used " + self.move3 + " and was unsucsessful!\n")
 				else:
 					print("That's not a valid input! (Check your spelling)")
-	def move()
+	def move():
+		return
 
 
 Kyle = Poke_a_Greg(100, "Scratch", 90, 35, 10, "Sneeze", 67, 15, 14, "Fart", 38, 8, 22, "Christmas Kyle")
