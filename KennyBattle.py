@@ -1,3 +1,4 @@
+from graphics  import *
 import random
 import time
 class Poke_a_Greg:
