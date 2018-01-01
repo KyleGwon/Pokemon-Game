@@ -25,8 +25,12 @@ class RedTank:
 		return self.rShapes
 	def upperYCord(self):
 		return self.rShapes[0].getP1().getY()
+	def upperXCord(self):
+		return self.rShapes[0].getP1().getX()
 	def lowerYCord(self):
 		return self.rShapes[0].getP2().getY()
+	def lowerXCord(self):
+		return self.rShapes[0].getP2().getX()
 	def upperCannonXCord(self):
 		return self.rShapes[1].getP1().getX()
 	def upperCannonYCord(self):
@@ -101,42 +105,156 @@ class Bullet:
 		return self.centerY + self.radius
 	def bulletRight(self):
 		return self.centerX + self.radius
+# class HealthBar:
+# 	def __init__(self, size, location, points, win)
+# 	self.size = size
+# 	self.loc = location
+# 	self.pointX = points[0]
+# 	self.pointY = points[1]
+# 	self.win = win
+# 	HealthBar = Rectangle(self.pointX, self.pointX)
+# 	HealthBar.draw(self.win)
 def main():
-	width = 1500
-	height = 700
+	width = 1000
+	height = 500
 	win = GraphWin("Red vs. Blue Tank Battle", width, height)
+	rX = Point(width/2-50, 0)
+	rY1 = Point(width/2-50+100*(1), 25)
+	rY2 = Point(width/2-50+100*(2/3), 25)
+	rY3 = Point(width/2-50+100*(1/3), 25)
+	bX = Point(width/2-50, height-25)
+	bY1 = Point(width/2-50+100*(1), height)
+	bY2 = Point(width/2-50+100*(2/3), height)
+	bY3 = Point(width/2-50+100*(1/3), height)
+	rHealthBar1 = Rectangle(rX, rY1)
+	rHealthBar2 = Rectangle(rX, rY2)
+	rHealthBar3 = Rectangle(rX, rY3)
+	bHealthBar1 = Rectangle(bX, bY1)
+	bHealthBar2 = Rectangle(bX, bY2)
+	bHealthBar3 = Rectangle(bX, bY3)
+	rHealthBar1.setFill("red")
+	rHealthBar2.setFill("red")
+	rHealthBar3.setFill("red")
+	bHealthBar1.setFill("blue")
+	bHealthBar2.setFill("blue")
+	bHealthBar3.setFill("blue")
 
 	dimensions = [height/15, height/15]
 	rTank = RedTank(win, dimensions)
 	bTank = BlueTank(win, dimensions)
+	rHealthBar1.draw(win)
+	bHealthBar1.draw(win)
+	rText = "Red has won!"
+	bText = "Blue has won!"
+	pX = (width/2)
+	pY = (height/2)
+	p = Point(pX, pY)
 	moveDistance = height/20
-	bulletSpeed = height/20
+	bulletSpeed = height/ 20
 	redBullets = []
 	blueBullets = []
 	rPop = []
 	bPop = []
-	while True:
+	rHealth = 3
+	bHealth = 3
+	rScore = 0
+	bScore = 0
+	rScoreText = "Red's score is: "
+	bScoreText = "Blue's score: "
+	while rHealth > 0 and bHealth > 0:
 		for i in range(len(redBullets)):
 			if redBullets[i].getCenterX() + redBullets[i].getRadius() + bulletSpeed < width:
 				redBullets[i].moveBullet()
-				time.sleep(.03/(len(redBullets)+len(blueBullets)))
+				time.sleep(.02/(len(redBullets)+len(blueBullets)))
 				if redBullets[i].bulletRight() > bTank.upperXCord():
 					if redBullets[i].bulletTop() > bTank.upperYCord():
 						if redBullets[i].bulletTop() < bTank.lowerYCord():
-							break
+							if redBullets[i].bulletRight() < bTank.lowerXCord():
+								redBullets[i].undrawBullet()
+								rPop.append(i)
+								if bHealth == 1:
+									bHealthBar3.undraw()
+									bHealthBar1.draw(win)
+									bHealth = 3
+									distToLeft = -rTank.upperXCord()
+									rScore += 1
+									for i in range(len(redBullets)):
+										redBullets[i].undrawBullet()
+									redBullets.pop()
+									rPop.pop()
+									break
+									if rScore >= 5:
+										bHealth = 0 
+									for shape in rTank.getRShapes():
+										shape.move(distToLeft, 0)
+									distToBottom = height - rTank.lowerYCord()
+									for shape in rTank.getRShapes():
+										shape.move(0, distToBottom)
+
+
+								elif bHealth == 2:
+									bHealthBar2.undraw()
+									bHealthBar3.draw(win)
+									bHealth -= 1
+								elif bHealth == 3:
+									bHealthBar1.undraw()
+									bHealthBar2.draw(win)
+									bHealth -= 1
 					elif redBullets[i].bulletBottom() < bTank.lowerYCord():
 						if redBullets[i].bulletBottom() > bTank.upperYCord():
-							break
+							if redBullets[i].bulletRight() < bTank.lowerXCord():
+								if bHealth == 1:
+									bHealthBar3.undraw()
+									rWinner = Text(p, rText)
+									rWinner.draw(win)
+									bHealth -= 1
+								elif bHealth == 2:
+									bHealthBar2.undraw()
+									bHealthBar3.draw(win)
+									bHealth -= 1
+								elif bHealth == 3:
+									bHealthBar1.undraw()
+									bHealthBar2.draw(win)
+									bHealth -= 1
 			else:
 				redBullets[i].undrawBullet()
-				rPop.append(i)
-		for i in rPop:
-			redBullets.pop(i)
-			rPop.pop(i)
 		for i in range(len(blueBullets)):
 			if blueBullets[i].getCenterX() - blueBullets[i].getRadius() - bulletSpeed > 0:
 				blueBullets[i].moveBullet()
-				time.sleep(.03/(len(blueBullets)+len(redBullets)))
+				time.sleep(.02/(len(blueBullets)+len(redBullets)))
+				if blueBullets[i].bulletLeft() < rTank.lowerXCord():
+					if blueBullets[i].bulletTop() > rTank.upperYCord():
+						if blueBullets[i].bulletTop() < rTank.lowerYCord():
+							if blueBullets[i].bulletLeft() > rTank.upperXCord():
+								if rHealth == 1:
+									rHealthBar3.undraw()
+									bWinner = Text(p, bText)
+									bWinner.draw(win)
+									rHealth -= 1
+								elif rHealth == 2:
+									rHealthBar2.undraw()
+									rHealthBar3.draw(win)
+									rHealth -= 1
+								elif rHealth == 3:
+									rHealthBar1.undraw()
+									rHealthBar2.draw(win)
+									rHealth -= 1
+					elif blueBullets[i].bulletBottom() < rTank.lowerYCord():
+						if blueBullets[i].bulletTop() > rTank.upperYCord():
+							if blueBullets[i].bulletLeft() > redTank.upperXCord():
+								if rHealth == 1:
+									rHealthBar3.undraw()
+									bWinner = Text(p, bText)
+									bWinner.draw(win)
+									rHealth -= 1
+								elif rHealth == 2:
+									rHealthBar2.undraw()
+									rHealthBar3.draw(win)
+									rHealth -= 1
+								elif rHealth == 3:
+									rHealthBar1.undraw()
+									rHealthBar2.draw(win)
+									rHealth -= 1
 			else:
 				blueBullets[i].undrawBullet()
 				bPop.append(i)
@@ -162,8 +280,24 @@ def main():
 				distToBottom = height - rTank.lowerYCord()
 				for shape in rTank.getRShapes():
 					shape.move(0, distToBottom)
-		if key == "d":
-			if len(redBullets) < 5:
+		elif key == "a":
+			if rTank.upperXCord() - moveDistance > 0:
+				for shape in rTank.getRShapes():
+					shape.move(-moveDistance,0)
+			else:
+				distToLeft = -rTank.upperXCord()
+				for shape in rTank.getRShapes():
+					shape.move(distToLeft, 0)
+		elif key == "d":
+			if rTank.lowerXCord() + moveDistance < width:
+				for shape in rTank.getRShapes():
+					shape.move(moveDistance, 0)
+			else:
+				distToRight = width - rTank.lowerXCord()
+				for shape in rTank.getRShapes():
+					shape.move(distToRight, 0)
+		if key == "q":
+			if len(redBullets) < 11:
 				rBullet = Bullet(bulletSpeed, rTank.lowerCannonXCord(), (rTank.upperCannonYCord() + rTank.lowerCannonYCord())/2, rTank.lowerCannonYCord() - rTank.upperCannonYCord(), win)
 				redBullets.append(rBullet)
 		if key == "Up":
@@ -182,9 +316,30 @@ def main():
 				distToBottom = height - bTank.lowerYCord()
 				for shape in bTank.getBShapes():
 					shape.move(0, distToBottom)
-		if key == "Left":
-			if len(blueBullets) < 5:
+		elif key == "Left":
+			if bTank.upperXCord() - moveDistance > 0:
+				for shape in bTank.getBShapes():
+					shape.move(-moveDistance,0)
+			else:
+				distToLeft = -bTank.upperXCord()
+				for shape in bTank.getBShapes():
+					shape.move(distToLeft, 0)
+		elif key == "Right":
+			if bTank.lowerXCord() + moveDistance < width:
+				for shape in bTank.getBShapes():
+					shape.move(moveDistance, 0)
+			else:
+				distToRight = width - bTank.lowerXCord()
+				for shape in bTank.getBShapes():
+					shape.move(distToRight, 0)
+		if key == "slash":
+			if len(blueBullets) < 11:
 				bBullet = Bullet(-bulletSpeed, bTank.upperCannonXCord(), (bTank.upperCannonYCord() + bTank.lowerCannonYCord())/2, bTank.lowerCannonYCord() - bTank.upperCannonYCord(), win)
 				blueBullets.append(bBullet)
+	win.getMouse()
+	win.close()
 	return
 main()
+
+# make it so that once you get hit, the bullet stops
+# create a sword function to wack ppl (make it do some like 360 spinning thing idk)
